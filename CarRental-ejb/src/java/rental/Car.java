@@ -18,7 +18,6 @@ public class Car {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    private int uid;
     @OneToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.REFRESH})
     private CarType type;
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
@@ -29,8 +28,7 @@ public class Car {
      * CONSTRUCTOR *
      ***************/
     
-    public Car(int uid, CarType type) {
-    	this.uid = uid;
+    public Car(CarType type) {
         this.type = type;
         this.reservations = new HashSet<Reservation>();
     }
