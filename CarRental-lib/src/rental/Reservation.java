@@ -22,13 +22,32 @@ public class Reservation extends Quote {
         this.carId = carId;
     }
     
-    /******
-     * ID *
-     ******/
-    
-    public int getCarId() {
-    	return carId;
+    public Reservation()
+    {
+        super();
     }
+
+    /*************
+     * Getters / Setters *
+     *************/
+    
+    public int getReservationId() {
+        return reservationId;
+    }
+
+    public void setReservationId(int reservationId) {
+        this.reservationId = reservationId;
+    }
+
+    public int getCarId() {
+        return carId;
+    }
+
+    public void setCarId(int carId) {
+        this.carId = carId;
+    }
+    
+    
     
     /*************
      * TO STRING *

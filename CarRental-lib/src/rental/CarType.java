@@ -29,26 +29,65 @@ public class CarType implements Serializable{
         this.rentalPricePerDay = rentalPricePerDay;
         this.smokingAllowed = smokingAllowed;
     }
-
-    public String getName() {
-    	return name;
+    
+    public CarType()
+    {
+        
     }
     
+    /*************
+     * Getters / Setters *
+     *************/
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public int getNbOfSeats() {
         return nbOfSeats;
     }
-    
+
+    public void setNbOfSeats(int nbOfSeats) {
+        this.nbOfSeats = nbOfSeats;
+    }
+
     public boolean isSmokingAllowed() {
         return smokingAllowed;
+    }
+
+    public void setSmokingAllowed(boolean smokingAllowed) {
+        this.smokingAllowed = smokingAllowed;
     }
 
     public double getRentalPricePerDay() {
         return rentalPricePerDay;
     }
-    
-    public float getTrunkSpace() {
-    	return trunkSpace;
+
+    public void setRentalPricePerDay(double rentalPricePerDay) {
+        this.rentalPricePerDay = rentalPricePerDay;
     }
+
+    public float getTrunkSpace() {
+        return trunkSpace;
+    }
+
+    public void setTrunkSpace(float trunkSpace) {
+        this.trunkSpace = trunkSpace;
+    }
+    
+    
     
     /*************
      * TO STRING *

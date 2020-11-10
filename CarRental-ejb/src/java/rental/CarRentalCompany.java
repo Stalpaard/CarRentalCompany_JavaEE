@@ -35,45 +35,59 @@ public class CarRentalCompany {
 
     public CarRentalCompany(String name, List<String> regions, List<Car> cars) {
         logger.log(Level.INFO, "<{0}> Starting up CRC {0} ...", name);
-        setName(name);
+        this.name = name;
         this.cars = cars;
-        setRegions(regions);
+        this.regions = regions;
         for (Car car : cars) {
             carTypes.add(car.getType());
         }
     }
-
-    /********
-     * NAME *
-     ********/
     
+    public CarRentalCompany()
+    {
+        
+    }
+
+    /*************
+     * Getters / Setters *
+     *************/
+
     public String getName() {
         return name;
     }
 
-    private void setName(String name) {
+    public void setName(String name) {
         this.name = name;
     }
 
-    /***********
-     * Regions *
-     **********/
-    private void setRegions(List<String> regions) {
-        this.regions = regions;
+    public List<Car> getCars() {
+        return cars;
     }
-    
+
+    public void setCars(List<Car> cars) {
+        this.cars = cars;
+    }
+
+    public Set<CarType> getCarTypes() {
+        return carTypes;
+    }
+
+    public void setCarTypes(Set<CarType> carTypes) {
+        this.carTypes = carTypes;
+    }
+
     public List<String> getRegions() {
-        return this.regions;
+        return regions;
+    }
+
+    public void setRegions(List<String> regions) {
+        this.regions = regions;
     }
 
     /*************
      * CAR TYPES *
      *************/
     
-    public Collection<CarType> getAllTypes() {
-        return carTypes;
-    }
-
     public CarType getType(String carTypeName) {
         for(CarType type:carTypes){
             if(type.getName().equals(carTypeName))

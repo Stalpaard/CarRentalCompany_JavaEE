@@ -29,7 +29,6 @@ import javax.transaction.SystemException;
 import rental.Car;
 import rental.CarRentalCompany;
 import rental.CarType;
-import rental.RentalStore;
 import rental.Reservation;
 
 @Stateless
@@ -47,50 +46,22 @@ public class ManagerSession implements ManagerSessionRemote {
     
     @Override
     public Set<CarType> getCarTypes(String company) {
-        try {
-            return new HashSet<CarType>(RentalStore.getRental(company).getAllTypes());
-        } catch (IllegalArgumentException ex) {
-            Logger.getLogger(ManagerSession.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
-        }
+        throw new UnsupportedOperationException("JPQL coming soon");
     }
 
     @Override
     public Set<Integer> getCarIds(String company, String type) {
-        Set<Integer> out = new HashSet<Integer>();
-        try {
-            for(Car c: RentalStore.getRental(company).getCars(type)){
-                out.add(c.getId());
-            }
-        } catch (IllegalArgumentException ex) {
-            Logger.getLogger(ManagerSession.class.getName()).log(Level.SEVERE, null, ex);
-            return null;
-        }
-        return out;
+        throw new UnsupportedOperationException("JPQL coming soon");
     }
 
     @Override
     public int getNumberOfReservations(String company, String type, int id) {
-        try {
-            return RentalStore.getRental(company).getCar(id).getReservations().size();
-        } catch (IllegalArgumentException ex) {
-            Logger.getLogger(ManagerSession.class.getName()).log(Level.SEVERE, null, ex);
-            return 0;
-        }
+        throw new UnsupportedOperationException("JPQL coming soon");
     }
 
     @Override
     public int getNumberOfReservations(String company, String type) {
-        Set<Reservation> out = new HashSet<Reservation>();
-        try {
-            for(Car c: RentalStore.getRental(company).getCars(type)){
-                out.addAll(c.getReservations());
-            }
-        } catch (IllegalArgumentException ex) {
-            Logger.getLogger(ManagerSession.class.getName()).log(Level.SEVERE, null, ex);
-            return 0;
-        }
-        return out.size();
+        throw new UnsupportedOperationException("JPQL coming soon");
     }
 
     @Override
@@ -119,11 +90,11 @@ public class ManagerSession implements ManagerSessionRemote {
             CrcData data = loadData(datafile);
             CarRentalCompany company = new CarRentalCompany(data.name, data.regions, data.cars);
             em.persist(company);
-            Logger.getLogger(RentalStore.class.getName()).log(Level.INFO, "Loaded {0} from file {1}", new Object[]{data.name, datafile});
+            Logger.getLogger(ManagerSession.class.getName()).log(Level.INFO, "Loaded {0} from file {1}", new Object[]{data.name, datafile});
         } catch (NumberFormatException ex) {
-            Logger.getLogger(RentalStore.class.getName()).log(Level.SEVERE, "bad file", ex);
+            Logger.getLogger(ManagerSession.class.getName()).log(Level.SEVERE, "bad file", ex);
         } catch (IOException ex) {
-            Logger.getLogger(RentalStore.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ManagerSession.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }
@@ -136,7 +107,7 @@ public class ManagerSession implements ManagerSessionRemote {
         int nextuid = 0;
        
         //open file from jar
-        BufferedReader in = new BufferedReader(new InputStreamReader(RentalStore.class.getClassLoader().getResourceAsStream(datafile)));
+        BufferedReader in = new BufferedReader(new InputStreamReader(ManagerSession.class.getClassLoader().getResourceAsStream(datafile)));
         
         try {
             while (in.ready()) {

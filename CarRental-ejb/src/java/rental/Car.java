@@ -16,7 +16,7 @@ import javax.persistence.OneToOne;
 @Entity
 public class Car {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
     private int id;
     @OneToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.REFRESH})
     private CarType type;
@@ -32,26 +32,41 @@ public class Car {
         this.type = type;
         this.reservations = new HashSet<Reservation>();
     }
-
-    /******
-     * ID *
-     ******/
     
-    public int getId() {
-    	return id;
+    public Car()
+    {
+        
     }
     
-    /************
-     * CAR TYPE *
-     ************/
-    
+    /*************
+     * Getters / Setters *
+     *************/
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     public CarType getType() {
         return type;
     }
-	
-	public void setType(CarType type) {
-		this.type = type;
-	}
+
+    public void setType(CarType type) {
+        this.type = type;
+    }
+
+    public Set<Reservation> getReservations() {
+        return reservations;
+    }
+
+    public void setReservations(Set<Reservation> reservations) {
+        this.reservations = reservations;
+    }
+
+    
     /****************
      * RESERVATIONS *
      ****************/
@@ -77,7 +92,4 @@ public class Car {
         reservations.remove(reservation);
     }
 
-    public Set<Reservation> getReservations() {
-        return reservations;
-    }
 }

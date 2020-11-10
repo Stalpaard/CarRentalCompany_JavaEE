@@ -20,6 +20,10 @@ public class Quote implements Serializable {
      * CONSTRUCTOR *
      ***************/
 
+    public Quote()
+    {
+    }
+    
     public Quote(String carRenter, Date start, Date end, String rentalCompany, String carType, double rentalPrice) {
         this.carRenter = carRenter;
         this.startDate = start;
@@ -29,29 +33,59 @@ public class Quote implements Serializable {
         this.rentalPrice = rentalPrice;
     }
 
+    /*************
+     * Getters / Setters *
+     *************/
+    
     public Date getStartDate() {
         return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
     }
 
     public Date getEndDate() {
         return endDate;
     }
 
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
+    }
+
     public String getCarRenter() {
         return carRenter;
+    }
+
+    public void setCarRenter(String carRenter) {
+        this.carRenter = carRenter;
     }
 
     public String getRentalCompany() {
         return rentalCompany;
     }
 
+    public void setRentalCompany(String rentalCompany) {
+        this.rentalCompany = rentalCompany;
+    }
+
+    public String getCarType() {
+        return carType;
+    }
+
+    public void setCarType(String carType) {
+        this.carType = carType;
+    }
+
     public double getRentalPrice() {
         return rentalPrice;
     }
-    
-    public String getCarType() {
-	return carType;
+
+    public void setRentalPrice(double rentalPrice) {
+        this.rentalPrice = rentalPrice;
     }
+
+    
     
     /*************
      * TO STRING *

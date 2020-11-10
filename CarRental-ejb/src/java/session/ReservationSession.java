@@ -17,7 +17,6 @@ import javax.persistence.PersistenceContext;
 import rental.CarRentalCompany;
 import rental.CarType;
 import rental.Quote;
-import rental.RentalStore;
 import rental.Reservation;
 import rental.ReservationConstraints;
 import rental.ReservationException;
@@ -38,30 +37,27 @@ public class ReservationSession implements ReservationSessionRemote {
 
     @Override
     public Set<String> getAllRentalCompanies() {
-        return new HashSet<String>(RentalStore.getRentals().keySet());
+        throw new UnsupportedOperationException("JPQL coming soon");
     }
     
     @Override
     public List<CarType> getAvailableCarTypes(Date start, Date end) {
-        List<CarType> availableCarTypes = new LinkedList<CarType>();
-        for(String crc : getAllRentalCompanies()) {
-            for(CarType ct : RentalStore.getRentals().get(crc).getAvailableCarTypes(start, end)) {
-                if(!availableCarTypes.contains(ct))
-                    availableCarTypes.add(ct);
-            }
-        }
-        return availableCarTypes;
+        throw new UnsupportedOperationException("JPQL coming soon");
     }
 
     @Override
     public Quote createQuote(String company, ReservationConstraints constraints) throws ReservationException {
+        throw new UnsupportedOperationException("JPQL coming soon");
+        /*
         try {
-            Quote out = RentalStore.getRental(company).createQuote(constraints, renter);
-            quotes.add(out);
-            return out;
+            //Query to retrieve all rental companies
+            //Quote out = RentalStore.getRental(company).createQuote(constraints, renter);
+            //quotes.add(out);
+            //return out;
         } catch(Exception e) {
             throw new ReservationException(e);
         }
+        */
     }
 
     @Override
