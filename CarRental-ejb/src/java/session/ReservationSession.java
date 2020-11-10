@@ -5,7 +5,16 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Resource;
+import javax.ejb.EJBContext;
 import javax.ejb.Stateful;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import rental.CarRentalCompany;
 import rental.CarType;
 import rental.Quote;
 import rental.RentalStore;
@@ -14,8 +23,16 @@ import rental.ReservationConstraints;
 import rental.ReservationException;
 
 @Stateful
+@TransactionManagement(TransactionManagementType.CONTAINER)
+@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class ReservationSession implements ReservationSessionRemote {
 
+    @Resource
+    private EJBContext context;
+    
+    @PersistenceContext
+    private EntityManager em;
+    
     private String renter;
     private List<Quote> quotes = new LinkedList<Quote>();
 
@@ -53,15 +70,20 @@ public class ReservationSession implements ReservationSessionRemote {
     }
 
     @Override
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<Reservation> confirmQuotes() throws ReservationException {
         List<Reservation> done = new LinkedList<Reservation>();
         try {
             for (Quote quote : quotes) {
-                done.add(RentalStore.getRental(quote.getRentalCompany()).confirmQuote(quote));
+                CarRentalCompany crc = em.find(CarRentalCompany.class, quote.getRentalCompany());
+                if(crc == null) throw new ReservationException("Company doesn't exist anymore");
+                done.add(crc.confirmQuote(quote));
+                em.merge(crc);
             }
         } catch (Exception e) {
-            for(Reservation r:done)
-                RentalStore.getRental(r.getRentalCompany()).cancelReservation(r);
+            context.setRollbackOnly();
+            //for(Reservation r:done)
+               // RentalStore.getRental(r.getRentalCompany()).cancelReservation(r);
             throw new ReservationException(e);
         }
         return done;

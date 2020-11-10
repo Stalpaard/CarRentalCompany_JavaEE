@@ -33,6 +33,7 @@ public class RentalStore {
         return rentals;
     }
 
+    //Used in loading .csv data in manager session
     public static void loadRental(String datafile) {
         try {
             CrcData data = loadData(datafile);
@@ -46,7 +47,8 @@ public class RentalStore {
         }
 
     }
-
+    
+    //Used in loading .csv data in manager session
     public static CrcData loadData(String datafile)
             throws NumberFormatException, IOException {
 
