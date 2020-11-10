@@ -1,7 +1,9 @@
 package rental;
 
 import java.io.Serializable;
+import javax.persistence.Entity;
 
+@Entity
 public class CarType implements Serializable{
     
     private String name;
