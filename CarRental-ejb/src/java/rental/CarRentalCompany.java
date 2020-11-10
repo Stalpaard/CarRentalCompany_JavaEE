@@ -22,7 +22,7 @@ public class CarRentalCompany {
     private static Logger logger = Logger.getLogger(CarRentalCompany.class.getName());
     @Id
     private String name;
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "company")
     private List<Car> cars;
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CarType> carTypes = new HashSet<CarType>();

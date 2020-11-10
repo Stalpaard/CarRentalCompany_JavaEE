@@ -32,8 +32,8 @@ import rental.CarType;
 import rental.Reservation;
 
 @Stateless
-@DeclareRoles({"Manager"})
-@RolesAllowed("Manager")
+//@DeclareRoles({"Manager"})
+//@RolesAllowed("Manager")
 @TransactionManagement(TransactionManagementType.CONTAINER)
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class ManagerSession implements ManagerSessionRemote {
@@ -90,11 +90,11 @@ public class ManagerSession implements ManagerSessionRemote {
             CrcData data = loadData(datafile);
             CarRentalCompany company = new CarRentalCompany(data.name, data.regions, data.cars);
             em.persist(company);
-            Logger.getLogger(ManagerSession.class.getName()).log(Level.INFO, "Loaded {0} from file {1}", new Object[]{data.name, datafile});
+            //Logger.getLogger(ManagerSession.class.getName()).log(Level.INFO, "Loaded {0} from file {1}", new Object[]{data.name, datafile});
         } catch (NumberFormatException ex) {
-            Logger.getLogger(ManagerSession.class.getName()).log(Level.SEVERE, "bad file", ex);
+            //Logger.getLogger(ManagerSession.class.getName()).log(Level.SEVERE, "bad file", ex);
         } catch (IOException ex) {
-            Logger.getLogger(ManagerSession.class.getName()).log(Level.SEVERE, null, ex);
+            // Logger.getLogger(ManagerSession.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }

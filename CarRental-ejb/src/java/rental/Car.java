@@ -16,19 +16,21 @@ import javax.persistence.OneToOne;
 @Entity
 public class Car {
 
-    @Id
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+    private int uid;
     @OneToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.REFRESH})
     private CarType type;
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Reservation> reservations;
+    private CarRentalCompany company;
 
     /***************
      * CONSTRUCTOR *
      ***************/
     
     public Car(int uid, CarType type) {
-    	this.id = uid;
+    	this.uid = uid;
         this.type = type;
         this.reservations = new HashSet<Reservation>();
     }
