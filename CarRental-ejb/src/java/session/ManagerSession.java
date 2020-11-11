@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.rmi.RemoteException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -43,25 +44,40 @@ public class ManagerSession implements ManagerSessionRemote {
     
     @PersistenceContext
     private EntityManager em;
+  
+    @Override
+    public Set<String> getAllRentalCompanies() throws RemoteException {
+        return new HashSet<>(em.createNamedQuery("findAllRentalCompanyNames").getResultList());
+    }
     
     @Override
     public Set<CarType> getCarTypes(String company) {
-        throw new UnsupportedOperationException("JPQL coming soon");
+        return new HashSet<>(em.createNamedQuery("findAllCarTypesInCompany")
+                .setParameter("companyName", company).getResultList()
+        );
     }
 
     @Override
     public Set<Integer> getCarIds(String company, String type) {
-        throw new UnsupportedOperationException("JPQL coming soon");
+        return new HashSet<>(em.createNamedQuery("getAllIdsForTypeInCompany")
+                .setParameter("companyName", company)
+                .setParameter("type", type).getResultList()
+        );
     }
 
     @Override
     public int getNumberOfReservations(String company, String type, int id) {
-        throw new UnsupportedOperationException("JPQL coming soon");
+        return em.createNamedQuery("getNumberOfReservationsForCarAndIDInCompany")
+                .setParameter("", company)
+                .setParameter("", type)
+                .setParameter("", id).getResultList().size();                
     }
 
     @Override
     public int getNumberOfReservations(String company, String type) {
-        throw new UnsupportedOperationException("JPQL coming soon");
+        return em.createNamedQuery("getNumberOfReservationsForCarInCompany")
+                .setParameter("", company)
+                .setParameter("", type).getResultList().size();
     }
 
     @Override
@@ -137,6 +153,41 @@ public class ManagerSession implements ManagerSessionRemote {
         }
 
         return out;
+    }
+
+    @Override
+    public List<CarType> getAvailableCarTypes(Date start, Date end) throws RemoteException {
+        List<CarType> carTypes;
+        carTypes = new LinkedList<>(em.createNamedQuery("getAvailableCarTypesInPeriod")
+                .setParameter("start", start)
+                .setParameter("end", end)
+                .getResultList());
+        
+        for(CarType carType : carTypes)
+        {
+            System.out.println(carType.toString());
+        }
+        return carTypes;
+    }
+
+    @Override
+    public int getNumberOfReservationsOfRenter(String renter) throws RemoteException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public Set<String> getBestClients() throws RemoteException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public CarType getMostPopularCarTypeIn(String carRentalCompanyName, int year) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public String getCheapestCarType(Date start, Date end, String region) throws RemoteException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     
     static class CrcData {

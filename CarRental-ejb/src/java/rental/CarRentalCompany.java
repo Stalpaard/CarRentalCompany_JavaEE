@@ -13,10 +13,35 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
+// https://en.wikibooks.org/wiki/Java_Persistence/Querying#Common_Queries
+
 @Entity
+@NamedQueries({
+    @NamedQuery(
+            name = "getAllRentalCompanyNames",
+            query = "SELECT c.name FROM CarRentalCompany c"),
+    @NamedQuery(
+            name = "getAllCarTypesInCompany",
+            query = "SELECT c.type FROM Car c, CarRentalCompany crc WHERE crc.name = :companyName AND c MEMBER of crc.cars"),
+    @NamedQuery(
+            name = "getAllIdsForTypeInCompany",
+            query = "SELECT c.id FROM Car c, CarRentalCompany crc WHERE crc.name = :companyName AND c.type.name = :type AND c MEMBER OF crc.cars"),
+    @NamedQuery(
+            name = "getNumberOfReservationsForCarAndIDInCompany",
+            query = "SELECT res FROM Car c, CarRentalCompany crc, Reservation res WHERE crc.name = :companyName AND c.type.name = :name AND c.id = :id AND res MEMBER OF c.reservations"),
+    @NamedQuery(
+            name = "getNumberOfReservationsForCarInCompany",
+            query = "SELECT res FROM Car c, CarRentalCompany crc, Reservation res WHERE crc.name = :companyName AND c.type.name = :name AND res MEMBER OF c.reservations"),
+    @NamedQuery(
+            name = "getAvailableCarTypesInPeriod",
+            query = "SELECT c.type FROM Car c, Reservation res WHERE res. "),
+    })
+
 public class CarRentalCompany {
 
     private static Logger logger = Logger.getLogger(CarRentalCompany.class.getName());
