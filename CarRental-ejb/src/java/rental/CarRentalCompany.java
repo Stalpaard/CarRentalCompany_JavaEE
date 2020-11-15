@@ -37,9 +37,28 @@ import javax.persistence.OneToOne;
     @NamedQuery(
             name = "getNumberOfReservationsForCarInCompany",
             query = "SELECT res FROM Car c, CarRentalCompany crc, Reservation res WHERE crc.name = :companyName AND c.type.name = :name AND res MEMBER OF c.reservations"),
+    // Deze is nog voorlopig fout
     @NamedQuery(
             name = "getAvailableCarTypesInPeriod",
-            query = "SELECT c.type FROM Car c, Reservation res WHERE res. "),
+            query = "SELECT c.type FROM Car c, Reservation res WHERE res.startDate <> :start AND res.endDate <> :end AND res.carId = c.id"),
+    @NamedQuery(
+            name = "getReservationsByRenter",
+            query = "SELECT res FROM Reservation res WHERE res.carRenter = :renter"),
+    // Voorlopig fout;
+    @NamedQuery(
+            name = "getBestClients",
+            query = "SELECT res.carRenter FROM Reservation res"),
+    // TODO
+    @NamedQuery(
+            name = "getMostPopularCarTypeInCompanyInYear",
+            query = "SELECT c.type FROM Car c, CarRentalCompany crc, Reservation res WHERE EXTRACT(YEAR FROM res.startDate) > 20"),
+    // TODO
+    @NamedQuery(
+            name = "getCheapestCarTypeInPeriodAndRegion",
+            query = "SELECT c.name FROM CarType c, Reservation res, CarRentalCompany crc " 
+                    + "WHERE MIN(c.rentalPricePerDay) AND res.startDate <> :start AND res.endDate <> :end AND :region IN (crc.regions)"
+            
+    )
     })
 
 public class CarRentalCompany {

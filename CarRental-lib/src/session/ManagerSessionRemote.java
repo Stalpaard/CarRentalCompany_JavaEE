@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Set;
 import javax.ejb.Remote;
 import rental.CarType;
-import rental.Reservation;
 
 @Remote
 public interface ManagerSessionRemote {

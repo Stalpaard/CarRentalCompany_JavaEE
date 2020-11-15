@@ -172,22 +172,49 @@ public class ManagerSession implements ManagerSessionRemote {
 
     @Override
     public int getNumberOfReservationsOfRenter(String renter) throws RemoteException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return em.createNamedQuery("getReservationsByRenter")
+                .setParameter("renter", renter)
+                .getResultList().size();
     }
 
     @Override
     public Set<String> getBestClients() throws RemoteException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Set<String> clients = new HashSet<>(em.createNamedQuery("getBestClients")
+                .getResultList());
+        return clients;
     }
 
     @Override
     public CarType getMostPopularCarTypeIn(String carRentalCompanyName, int year) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Object result = em.createNamedQuery("getMostPopularCarTypeInCompanyInYear")
+                .setParameter("company", carRentalCompanyName)
+                .setParameter("year", year)
+                .getFirstResult();
+        if(result == null)
+        {
+            throw new Exception();
+        }
+        else
+        {
+            return (CarType) result;
+        }
     }
 
     @Override
     public String getCheapestCarType(Date start, Date end, String region) throws RemoteException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        Object cheapest = em.createNamedQuery("getCheapestCarTypeInPeriodAndRegion")
+                .setParameter("start", start)
+                .setParameter("end", end)
+                .setParameter("region", region)
+                .getFirstResult();
+        if(cheapest == null)
+        {
+            throw new RemoteException();
+        }
+        else
+        {
+            return (String) cheapest;
+        }
     }
     
     static class CrcData {
