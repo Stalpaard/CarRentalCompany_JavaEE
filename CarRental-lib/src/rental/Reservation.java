@@ -14,6 +14,8 @@ public class Reservation extends Quote {
     
     /***************
      * CONSTRUCTOR *
+     * @param quote
+     * @param carId
      ***************/
 
     public Reservation(Quote quote, int carId) {

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.rmi.RemoteException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -43,25 +44,40 @@ public class ManagerSession implements ManagerSessionRemote {
     
     @PersistenceContext
     private EntityManager em;
+  
+    @Override
+    public Set<String> getAllRentalCompanies() throws RemoteException {
+        return new HashSet<>(em.createNamedQuery("findAllRentalCompanyNames").getResultList());
+    }
     
     @Override
     public Set<CarType> getCarTypes(String company) {
-        throw new UnsupportedOperationException("JPQL coming soon");
+        return new HashSet<>(em.createNamedQuery("findAllCarTypesInCompany")
+                .setParameter("companyName", company).getResultList()
+        );
     }
 
     @Override
     public Set<Integer> getCarIds(String company, String type) {
-        throw new UnsupportedOperationException("JPQL coming soon");
+        return new HashSet<>(em.createNamedQuery("getAllIdsForTypeInCompany")
+                .setParameter("companyName", company)
+                .setParameter("type", type).getResultList()
+        );
     }
 
     @Override
     public int getNumberOfReservations(String company, String type, int id) {
-        throw new UnsupportedOperationException("JPQL coming soon");
+        return em.createNamedQuery("getNumberOfReservationsForCarAndIDInCompany")
+                .setParameter("", company)
+                .setParameter("", type)
+                .setParameter("", id).getResultList().size();                
     }
 
     @Override
     public int getNumberOfReservations(String company, String type) {
-        throw new UnsupportedOperationException("JPQL coming soon");
+        return em.createNamedQuery("getNumberOfReservationsForCarInCompany")
+                .setParameter("", company)
+                .setParameter("", type).getResultList().size();
     }
 
     @Override
@@ -137,6 +153,68 @@ public class ManagerSession implements ManagerSessionRemote {
         }
 
         return out;
+    }
+
+    @Override
+    public List<CarType> getAvailableCarTypes(Date start, Date end) throws RemoteException {
+        List<CarType> carTypes;
+        carTypes = new LinkedList<>(em.createNamedQuery("getAvailableCarTypesInPeriod")
+                .setParameter("start", start)
+                .setParameter("end", end)
+                .getResultList());
+        
+        for(CarType carType : carTypes)
+        {
+            System.out.println(carType.toString());
+        }
+        return carTypes;
+    }
+
+    @Override
+    public int getNumberOfReservationsOfRenter(String renter) throws RemoteException {
+        return em.createNamedQuery("getReservationsByRenter")
+                .setParameter("renter", renter)
+                .getResultList().size();
+    }
+
+    @Override
+    public Set<String> getBestClients() throws RemoteException {
+        Set<String> clients = new HashSet<>(em.createNamedQuery("getBestClients")
+                .getResultList());
+        return clients;
+    }
+
+    @Override
+    public CarType getMostPopularCarTypeIn(String carRentalCompanyName, int year) throws Exception {
+        Object result = em.createNamedQuery("getMostPopularCarTypeInCompanyInYear")
+                .setParameter("company", carRentalCompanyName)
+                .setParameter("year", year)
+                .getFirstResult();
+        if(result == null)
+        {
+            throw new Exception();
+        }
+        else
+        {
+            return (CarType) result;
+        }
+    }
+
+    @Override
+    public String getCheapestCarType(Date start, Date end, String region) throws RemoteException {
+        Object cheapest = em.createNamedQuery("getCheapestCarTypeInPeriodAndRegion")
+                .setParameter("start", start)
+                .setParameter("end", end)
+                .setParameter("region", region)
+                .getFirstResult();
+        if(cheapest == null)
+        {
+            throw new RemoteException();
+        }
+        else
+        {
+            return (String) cheapest;
+        }
     }
     
     static class CrcData {

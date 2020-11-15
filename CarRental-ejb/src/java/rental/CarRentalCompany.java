@@ -13,10 +13,54 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
+// https://en.wikibooks.org/wiki/Java_Persistence/Querying#Common_Queries
+
 @Entity
+@NamedQueries({
+    @NamedQuery(
+            name = "getAllRentalCompanyNames",
+            query = "SELECT c.name FROM CarRentalCompany c"),
+    @NamedQuery(
+            name = "getAllCarTypesInCompany",
+            query = "SELECT c.type FROM Car c, CarRentalCompany crc WHERE crc.name = :companyName AND c MEMBER of crc.cars"),
+    @NamedQuery(
+            name = "getAllIdsForTypeInCompany",
+            query = "SELECT c.id FROM Car c, CarRentalCompany crc WHERE crc.name = :companyName AND c.type.name = :type AND c MEMBER OF crc.cars"),
+    @NamedQuery(
+            name = "getNumberOfReservationsForCarAndIDInCompany",
+            query = "SELECT res FROM Car c, CarRentalCompany crc, Reservation res WHERE crc.name = :companyName AND c.type.name = :name AND c.id = :id AND res MEMBER OF c.reservations"),
+    @NamedQuery(
+            name = "getNumberOfReservationsForCarInCompany",
+            query = "SELECT res FROM Car c, CarRentalCompany crc, Reservation res WHERE crc.name = :companyName AND c.type.name = :name AND res MEMBER OF c.reservations"),
+    // Deze is nog voorlopig fout
+    @NamedQuery(
+            name = "getAvailableCarTypesInPeriod",
+            query = "SELECT c.type FROM Car c, Reservation res WHERE res.startDate <> :start AND res.endDate <> :end AND res.carId = c.id"),
+    @NamedQuery(
+            name = "getReservationsByRenter",
+            query = "SELECT res FROM Reservation res WHERE res.carRenter = :renter"),
+    // Voorlopig fout;
+    @NamedQuery(
+            name = "getBestClients",
+            query = "SELECT res.carRenter FROM Reservation res"),
+    // TODO
+    @NamedQuery(
+            name = "getMostPopularCarTypeInCompanyInYear",
+            query = "SELECT c.type FROM Car c, CarRentalCompany crc, Reservation res WHERE EXTRACT(YEAR FROM res.startDate) > 20"),
+    // TODO
+    @NamedQuery(
+            name = "getCheapestCarTypeInPeriodAndRegion",
+            query = "SELECT c.name FROM CarType c, Reservation res, CarRentalCompany crc " 
+                    + "WHERE MIN(c.rentalPricePerDay) AND res.startDate <> :start AND res.endDate <> :end AND :region IN (crc.regions)"
+            
+    )
+    })
+
 public class CarRentalCompany {
 
     private static Logger logger = Logger.getLogger(CarRentalCompany.class.getName());
