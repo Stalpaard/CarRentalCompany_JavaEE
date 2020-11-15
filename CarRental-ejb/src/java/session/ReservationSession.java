@@ -1,5 +1,6 @@
 package session;
 
+import java.rmi.RemoteException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -36,28 +37,45 @@ public class ReservationSession implements ReservationSessionRemote {
     private List<Quote> quotes = new LinkedList<Quote>();
 
     @Override
-    public Set<String> getAllRentalCompanies() {
-        throw new UnsupportedOperationException("JPQL coming soon");
+    public Set<String> getAllRentalCompanies() throws RemoteException {
+        return new HashSet<>(em.createNamedQuery("getAllRentalCompanyNames").getResultList());
     }
     
     @Override
     public List<CarType> getAvailableCarTypes(Date start, Date end) {
-        throw new UnsupportedOperationException("JPQL coming soon");
+        List<CarType> available = em.createNamedQuery("getAvailableCarTypesInPeriod")
+                .setParameter("start", start)
+                .setParameter("end", end)
+                .getResultList();
+        for(CarType c : available) System.out.println(c.toString() + " is available");
+        return available;
     }
 
     @Override
-    public Quote createQuote(String company, ReservationConstraints constraints) throws ReservationException {
-        throw new UnsupportedOperationException("JPQL coming soon");
-        /*
+    public Quote createQuote(String renter, Date start, Date end, String carType, String region) throws RemoteException, ReservationException {
         try {
-            //Query to retrieve all rental companies
-            //Quote out = RentalStore.getRental(company).createQuote(constraints, renter);
-            //quotes.add(out);
-            //return out;
+            Quote q = null;
+            try{
+               for(String name : (List<String>)em.createNamedQuery("getAllRentalCompanyNames").getResultList())
+                {
+                    CarRentalCompany crc = (CarRentalCompany)em.find(CarRentalCompany.class, name);
+                    q = crc.createQuote(new ReservationConstraints(start, end, carType, region), renter);
+                    if(q != null)
+                    {
+                        quotes.add(q);
+                        return q;  
+                    }
+                } 
+            }
+            catch(ReservationException e)
+            {
+                //shit happens
+            }
+            
         } catch(Exception e) {
-            throw new ReservationException(e);
+            throw new RemoteException(e.getMessage());
         }
-        */
+        throw new ReservationException("No quotes possible with given constraints");
     }
 
     @Override
@@ -68,7 +86,7 @@ public class ReservationSession implements ReservationSessionRemote {
     @Override
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<Reservation> confirmQuotes() throws ReservationException {
-        List<Reservation> done = new LinkedList<Reservation>();
+        List<Reservation> done = new LinkedList<>();
         try {
             for (Quote quote : quotes) {
                 CarRentalCompany crc = em.find(CarRentalCompany.class, quote.getRentalCompany());
@@ -96,5 +114,22 @@ public class ReservationSession implements ReservationSessionRemote {
     @Override
     public String getRenterName() {
         return renter;
+    }
+    
+    @Override
+    public String getCheapestCarType(Date start, Date end, String region) throws RemoteException {
+        Object cheapest = em.createNamedQuery("getCheapestCarTypeInPeriodAndRegion")
+                .setParameter("start", start)
+                .setParameter("end", end)
+                .setParameter("region", region)
+                .getFirstResult();
+        if(cheapest == null)
+        {
+            throw new RemoteException();
+        }
+        else
+        {
+            return (String) cheapest;
+        }
     }
 }

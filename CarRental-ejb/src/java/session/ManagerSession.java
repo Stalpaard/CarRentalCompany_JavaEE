@@ -5,32 +5,24 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.rmi.RemoteException;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.annotation.Resource;
-import javax.annotation.security.DeclareRoles;
-import javax.annotation.security.RolesAllowed;
 import javax.ejb.EJBContext;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
-import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
-import javax.transaction.SystemException;
 import rental.Car;
 import rental.CarRentalCompany;
 import rental.CarType;
-import rental.Reservation;
 
 @Stateless
 //@DeclareRoles({"Manager"})
@@ -154,22 +146,7 @@ public class ManagerSession implements ManagerSessionRemote {
 
         return out;
     }
-
-    @Override
-    public List<CarType> getAvailableCarTypes(Date start, Date end) throws RemoteException {
-        List<CarType> carTypes;
-        carTypes = new LinkedList<>(em.createNamedQuery("getAvailableCarTypesInPeriod")
-                .setParameter("start", start)
-                .setParameter("end", end)
-                .getResultList());
-        
-        for(CarType carType : carTypes)
-        {
-            System.out.println(carType.toString());
-        }
-        return carTypes;
-    }
-
+    
     @Override
     public int getNumberOfReservationsOfRenter(String renter) throws RemoteException {
         return em.createNamedQuery("getReservationsByRenter")
@@ -197,23 +174,6 @@ public class ManagerSession implements ManagerSessionRemote {
         else
         {
             return (CarType) result;
-        }
-    }
-
-    @Override
-    public String getCheapestCarType(Date start, Date end, String region) throws RemoteException {
-        Object cheapest = em.createNamedQuery("getCheapestCarTypeInPeriodAndRegion")
-                .setParameter("start", start)
-                .setParameter("end", end)
-                .setParameter("region", region)
-                .getFirstResult();
-        if(cheapest == null)
-        {
-            throw new RemoteException();
-        }
-        else
-        {
-            return (String) cheapest;
         }
     }
     
