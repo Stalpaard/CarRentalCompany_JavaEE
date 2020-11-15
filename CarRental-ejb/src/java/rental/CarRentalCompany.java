@@ -1,6 +1,6 @@
 package rental;
 
-import java.util.Collection;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -9,25 +9,25 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.persistence.CascadeType;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 
-// https://en.wikibooks.org/wiki/Java_Persistence/Querying#Common_Queries
-
-@Entity
 @NamedQueries({
+    @NamedQuery(
+            name = "getAllRentalCompanies",
+            query = "SELECT c FROM CarRentalCompany c"),
     @NamedQuery(
             name = "getAllRentalCompanyNames",
             query = "SELECT c.name FROM CarRentalCompany c"),
     @NamedQuery(
             name = "getAllCarTypesInCompany",
-            query = "SELECT c.type FROM Car c, CarRentalCompany crc WHERE crc.name = :companyName AND c MEMBER of crc.cars"),
+            query = "SELECT c.type FROM Car c, CarRentalCompany crc WHERE crc.name = :companyName AND c MEMBER OF crc.cars"),
     @NamedQuery(
             name = "getAllIdsForTypeInCompany",
             query = "SELECT c.id FROM Car c, CarRentalCompany crc WHERE crc.name = :companyName AND c.type.name = :type AND c MEMBER OF crc.cars"),
@@ -37,31 +37,33 @@ import javax.persistence.OneToOne;
     @NamedQuery(
             name = "getNumberOfReservationsForCarInCompany",
             query = "SELECT res FROM Car c, CarRentalCompany crc, Reservation res WHERE crc.name = :companyName AND c.type.name = :name AND res MEMBER OF c.reservations"),
-    // Deze is nog voorlopig fout
     @NamedQuery(
             name = "getAvailableCarTypesInPeriod",
-            query = "SELECT c.type FROM Car c, Reservation res WHERE res.startDate <> :start AND res.endDate <> :end AND res.carId = c.id"),
+            query = "SELECT c.type FROM Car c WHERE (SELECT COUNT(res) FROM Reservation res WHERE res.carId = c.id AND res.startDate >= :start AND res.endDate <= :end) <= 0"),
+    @NamedQuery(
+            name = "getCheapestCarTypeInPeriodAndRegion",
+            query = "SELECT c.type FROM CarRentalCompany crc LEFT JOIN crc.regions r LEFT JOIN Car c LEFT JOIN CarType t WHERE "
+                    + "c.type.rentalPricePerDay = (SELECT MIN(c.type.rentalPricePerDay) FROM CarRentalCompany crc LEFT JOIN Car c LEFT JOIN CarType t LEFT JOIN crc.regions r WHERE "
+                    + "r = :region "
+                    + "AND (SELECT COUNT(res) FROM Reservation res WHERE res.carId = c.id AND res.startDate >= :start AND res.endDate <= :end) <= 0)"),
     @NamedQuery(
             name = "getReservationsByRenter",
             query = "SELECT res FROM Reservation res WHERE res.carRenter = :renter"),
-    // Voorlopig fout;
     @NamedQuery(
-            name = "getBestClients",
-            query = "SELECT res.carRenter FROM Reservation res"),
-    // TODO
+            name = "getBestClientResCount",
+            query = "SELECT COUNT(res.carRenter) FROM Reservation res GROUP BY res.carRenter ORDER BY COUNT(res.carRenter) DESC"),
+    @NamedQuery(
+            name = "getClientsWithReservations",
+            query = "SELECT res.carRenter FROM Reservation res GROUP BY res.carRenter HAVING COUNT(res) = :resCount"),
     @NamedQuery(
             name = "getMostPopularCarTypeInCompanyInYear",
-            query = "SELECT c.type FROM Car c, CarRentalCompany crc, Reservation res WHERE EXTRACT(YEAR FROM res.startDate) > 20"),
-    // TODO
-    @NamedQuery(
-            name = "getCheapestCarTypeInPeriodAndRegion",
-            query = "SELECT c.name FROM CarType c, Reservation res, CarRentalCompany crc " 
-                    + "WHERE MIN(c.rentalPricePerDay) AND res.startDate <> :start AND res.endDate <> :end AND :region IN (crc.regions)"
-            
-    )
+            query = "SELECT c.type FROM CarRentalCompany crc LEFT JOIN Car c LEFT JOIN Reservation res "
+                    + "WHERE res.rentalCompany = :company AND EXTRACT(YEAR FROM res.startDate) = :year GROUP BY c.type "
+                    + "ORDER BY COUNT(res) DESC")
     })
 
-public class CarRentalCompany {
+@Entity
+public class CarRentalCompany implements Serializable {
 
     private static Logger logger = Logger.getLogger(CarRentalCompany.class.getName());
     @Id
@@ -70,6 +72,7 @@ public class CarRentalCompany {
     private List<Car> cars;
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<CarType> carTypes = new HashSet<CarType>();
+    @ElementCollection
     private List<String> regions;
 
 	
@@ -78,7 +81,7 @@ public class CarRentalCompany {
      ***************/
 
     public CarRentalCompany(String name, List<String> regions, List<Car> cars) {
-        logger.log(Level.INFO, "<{0}> Starting up CRC {0} ...", name);
+        //logger.log(Level.INFO, "<{0}> Starting up CRC {0} ...", name);
         this.name = name;
         this.cars = cars;
         this.regions = regions;
@@ -141,7 +144,7 @@ public class CarRentalCompany {
     }
 
     public boolean isAvailable(String carTypeName, Date start, Date end) {
-        logger.log(Level.INFO, "<{0}> Checking availability for car type {1}", new Object[]{name, carTypeName});
+        //logger.log(Level.INFO, "<{0}> Checking availability for car type {1}", new Object[]{name, carTypeName});
         return getAvailableCarTypes(start, end).contains(getType(carTypeName));
     }
 
@@ -204,8 +207,8 @@ public class CarRentalCompany {
     
     public Quote createQuote(ReservationConstraints constraints, String guest)
             throws ReservationException {
-        logger.log(Level.INFO, "<{0}> Creating tentative reservation for {1} with constraints {2}",
-                new Object[]{name, guest, constraints.toString()});
+        //logger.log(Level.INFO, "<{0}> Creating tentative reservation for {1} with constraints {2}",
+          //      new Object[]{name, guest, constraints.toString()});
 
 
         if (!this.regions.contains(constraints.getRegion()) || !isAvailable(constraints.getCarType(), constraints.getStartDate(), constraints.getEndDate())) {
@@ -227,7 +230,7 @@ public class CarRentalCompany {
     }
 
     public Reservation confirmQuote(Quote quote) throws ReservationException {
-        logger.log(Level.INFO, "<{0}> Reservation of {1}", new Object[]{name, quote.toString()});
+        //logger.log(Level.INFO, "<{0}> Reservation of {1}", new Object[]{name, quote.toString()});
         List<Car> availableCars = getAvailableCars(quote.getCarType(), quote.getStartDate(), quote.getEndDate());
         if (availableCars.isEmpty()) {
             throw new ReservationException("Reservation failed, all cars of type " + quote.getCarType()
@@ -241,12 +244,12 @@ public class CarRentalCompany {
     }
 
     public void cancelReservation(Reservation res) {
-        logger.log(Level.INFO, "<{0}> Cancelling reservation {1}", new Object[]{name, res.toString()});
+        //logger.log(Level.INFO, "<{0}> Cancelling reservation {1}", new Object[]{name, res.toString()});
         getCar(res.getCarId()).removeReservation(res);
     }
     
     public Set<Reservation> getReservationsBy(String renter) {
-        logger.log(Level.INFO, "<{0}> Retrieving reservations by {1}", new Object[]{name, renter});
+        //logger.log(Level.INFO, "<{0}> Retrieving reservations by {1}", new Object[]{name, renter});
         Set<Reservation> out = new HashSet<Reservation>();
         for(Car c : cars) {
             for(Reservation r : c.getReservations()) {

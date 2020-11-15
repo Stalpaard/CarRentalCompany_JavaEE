@@ -109,17 +109,23 @@ public class ManagerSession implements ManagerSessionRemote {
 
     @Override
     public Set<String> getBestClients() throws RemoteException {
-        return new HashSet<>(em.createNamedQuery("getBestClients").getResultList());
+        Long best = (Long)em.createNamedQuery("getBestClientResCount").getResultList().get(0);
+        return new HashSet<>(
+                em.createNamedQuery("getClientsWithReservations")
+                        .setParameter("resCount", best)
+                        .getResultList());
     }
 
     @Override
     public CarType getMostPopularCarTypeIn(String carRentalCompanyName, int year) throws RemoteException {
-        Object result = em.createNamedQuery("getMostPopularCarTypeInCompanyInYear")
+        CarType carType = (CarType) em.createNamedQuery("getMostPopularCarTypeInCompanyInYear")
                 .setParameter("company", carRentalCompanyName)
                 .setParameter("year", year)
-                .getFirstResult();
-        if(result == null) throw new RemoteException("No cars were rented that year");
-        return (CarType) result;
+                .getResultList()
+                .get(0);
+        
+        if(carType == null) throw new RemoteException("No cars were rented that year");
+        return carType;
     }
     
     private void loadRental(String datafile) throws Exception {
