@@ -47,31 +47,25 @@ public class ReservationSession implements ReservationSessionRemote {
                 .setParameter("start", start)
                 .setParameter("end", end)
                 .getResultList();
-        for(CarType c : available) System.out.println(c.toString() + " is available");
         return available;
     }
 
     @Override
     public Quote createQuote(String renter, Date start, Date end, String carType, String region) throws RemoteException, ReservationException {
         try {
-            Quote q = null;
-            try{
-               for(String name : (List<String>)em.createNamedQuery("getAllRentalCompanyNames").getResultList())
-                {
-                    CarRentalCompany crc = (CarRentalCompany)em.find(CarRentalCompany.class, name);
-                    q = crc.createQuote(new ReservationConstraints(start, end, carType, region), renter);
-                    if(q != null)
-                    {
-                        quotes.add(q);
-                        return q;  
-                    }
-                } 
-            }
-            catch(ReservationException e)
+            for(CarRentalCompany crc : (List<CarRentalCompany>)em.createNamedQuery("getAllRentalCompanies").getResultList())
             {
-                //shit happens
+                try{
+                    Quote q = crc.createQuote(new ReservationConstraints(start, end, carType, region), renter);
+                    quotes.add(q);
+                    return q; 
+
+                }
+                catch(ReservationException | IllegalArgumentException e)
+                {
+                    System.out.println(e.getMessage());
+                }
             }
-            
         } catch(Exception e) {
             throw new RemoteException(e.getMessage());
         }
@@ -96,9 +90,7 @@ public class ReservationSession implements ReservationSessionRemote {
             }
         } catch (Exception e) {
             context.setRollbackOnly();
-            //for(Reservation r:done)
-               // RentalStore.getRental(r.getRentalCompany()).cancelReservation(r);
-            throw new ReservationException(e);
+            throw new ReservationException(e.getMessage());
         }
         return done;
     }

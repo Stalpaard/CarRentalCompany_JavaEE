@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 import javax.annotation.Resource;
+import javax.annotation.security.DeclareRoles;
+import javax.annotation.security.RolesAllowed;
 import javax.ejb.EJBContext;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -25,8 +27,8 @@ import rental.CarRentalCompany;
 import rental.CarType;
 
 @Stateless
-//@DeclareRoles({"Manager"})
-//@RolesAllowed("Manager")
+@DeclareRoles({"Manager"})
+@RolesAllowed("Manager")
 @TransactionManagement(TransactionManagementType.CONTAINER)
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class ManagerSession implements ManagerSessionRemote {
@@ -39,37 +41,42 @@ public class ManagerSession implements ManagerSessionRemote {
   
     @Override
     public Set<String> getAllRentalCompanies() throws RemoteException {
-        return new HashSet<>(em.createNamedQuery("findAllRentalCompanyNames").getResultList());
+        return new HashSet<>(em.createNamedQuery("getAllRentalCompanyNames").getResultList());
     }
     
     @Override
-    public Set<CarType> getCarTypes(String company) {
-        return new HashSet<>(em.createNamedQuery("findAllCarTypesInCompany")
-                .setParameter("companyName", company).getResultList()
-        );
+    public Set<CarType> getCarTypes(String company) throws RemoteException {
+        return new HashSet<>(em.createNamedQuery("getAllCarTypesInCompany")
+               .setParameter("companyName", company)
+               .getResultList());
     }
 
     @Override
-    public Set<Integer> getCarIds(String company, String type) {
+    public Set<Integer> getCarIds(String company, String type) throws RemoteException {
         return new HashSet<>(em.createNamedQuery("getAllIdsForTypeInCompany")
                 .setParameter("companyName", company)
-                .setParameter("type", type).getResultList()
-        );
+                .setParameter("type", type)
+                .getResultList());
     }
 
     @Override
-    public int getNumberOfReservations(String company, String type, int id) {
+    public int getNumberOfReservations(String company, String type, int id) throws RemoteException {
         return em.createNamedQuery("getNumberOfReservationsForCarAndIDInCompany")
-                .setParameter("", company)
-                .setParameter("", type)
-                .setParameter("", id).getResultList().size();                
+                .setParameter("companyName", company)
+                .setParameter("name", type)
+                .setParameter("id", id)
+                .getResultList()
+                .size();   
     }
 
     @Override
-    public int getNumberOfReservations(String company, String type) {
+    public int getNumberOfReservations(String company, String type) throws RemoteException {
         return em.createNamedQuery("getNumberOfReservationsForCarInCompany")
-                .setParameter("", company)
-                .setParameter("", type).getResultList().size();
+                .setParameter("companyName", company)
+                .setParameter("name", type)
+                .getResultList()
+                .size();
+        
     }
 
     @Override
@@ -78,9 +85,9 @@ public class ManagerSession implements ManagerSessionRemote {
         try{
            loadRental(companyCsv); //persist can result in exception if company was already added
         }
-        catch(PersistenceException e)
+        catch(Exception e)
         {
-            context.setRollbackOnly();
+            //context.setRollbackOnly();
             throw new RemoteException("Failed to add company: " + e.getMessage());
         }
     }
@@ -92,19 +99,35 @@ public class ManagerSession implements ManagerSessionRemote {
         if(crc == null) throw new RemoteException("Company not found in db");
         em.remove(crc); 
     }
+    
+    @Override
+    public int getNumberOfReservationsOfRenter(String renter) throws RemoteException {
+        return em.createNamedQuery("getReservationsByRenter")
+                .setParameter("renter", renter)
+                .getResultList()
+                .size();
+    }
 
-    private void loadRental(String datafile) throws PersistenceException {
-        try {
-            CrcData data = loadData(datafile);
-            CarRentalCompany company = new CarRentalCompany(data.name, data.regions, data.cars);
-            em.persist(company);
-            //Logger.getLogger(ManagerSession.class.getName()).log(Level.INFO, "Loaded {0} from file {1}", new Object[]{data.name, datafile});
-        } catch (NumberFormatException ex) {
-            //Logger.getLogger(ManagerSession.class.getName()).log(Level.SEVERE, "bad file", ex);
-        } catch (IOException ex) {
-            // Logger.getLogger(ManagerSession.class.getName()).log(Level.SEVERE, null, ex);
-        }
+    @Override
+    public Set<String> getBestClients() throws RemoteException {
+        return new HashSet<>(em.createNamedQuery("getBestClients").getResultList());
+    }
 
+    @Override
+    public CarType getMostPopularCarTypeIn(String carRentalCompanyName, int year) throws RemoteException {
+        Object result = em.createNamedQuery("getMostPopularCarTypeInCompanyInYear")
+                .setParameter("company", carRentalCompanyName)
+                .setParameter("year", year)
+                .getFirstResult();
+        if(result == null) throw new RemoteException("No cars were rented that year");
+        return (CarType) result;
+    }
+    
+    private void loadRental(String datafile) throws Exception {
+        CrcData data = loadData(datafile);
+        CarRentalCompany company = new CarRentalCompany(data.name, data.regions, data.cars);
+        em.persist(company);
+        //Logger.getLogger(ManagerSession.class.getName()).log(Level.INFO, "Loaded {0} from file {1}", new Object[]{data.name, datafile});
     }
     
     private static CrcData loadData(String datafile)
@@ -145,36 +168,6 @@ public class ManagerSession implements ManagerSessionRemote {
         }
 
         return out;
-    }
-    
-    @Override
-    public int getNumberOfReservationsOfRenter(String renter) throws RemoteException {
-        return em.createNamedQuery("getReservationsByRenter")
-                .setParameter("renter", renter)
-                .getResultList().size();
-    }
-
-    @Override
-    public Set<String> getBestClients() throws RemoteException {
-        Set<String> clients = new HashSet<>(em.createNamedQuery("getBestClients")
-                .getResultList());
-        return clients;
-    }
-
-    @Override
-    public CarType getMostPopularCarTypeIn(String carRentalCompanyName, int year) throws Exception {
-        Object result = em.createNamedQuery("getMostPopularCarTypeInCompanyInYear")
-                .setParameter("company", carRentalCompanyName)
-                .setParameter("year", year)
-                .getFirstResult();
-        if(result == null)
-        {
-            throw new Exception();
-        }
-        else
-        {
-            return (CarType) result;
-        }
     }
     
     static class CrcData {

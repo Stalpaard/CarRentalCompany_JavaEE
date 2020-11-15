@@ -1,5 +1,6 @@
 package rental;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -14,7 +15,7 @@ import javax.persistence.OneToOne;
 
 
 @Entity
-public class Car {
+public class Car implements Serializable {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
