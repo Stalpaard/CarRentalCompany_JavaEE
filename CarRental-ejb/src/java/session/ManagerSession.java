@@ -21,14 +21,13 @@ import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceException;
 import rental.Car;
 import rental.CarRentalCompany;
 import rental.CarType;
 
 @Stateless
-@DeclareRoles({"Manager"})
-@RolesAllowed("Manager")
+//@DeclareRoles({"Manager"})
+//@RolesAllowed("Manager")
 @TransactionManagement(TransactionManagementType.CONTAINER)
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class ManagerSession implements ManagerSessionRemote {

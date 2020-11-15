@@ -110,18 +110,13 @@ public class ReservationSession implements ReservationSessionRemote {
     
     @Override
     public String getCheapestCarType(Date start, Date end, String region) throws RemoteException {
-        Object cheapest = em.createNamedQuery("getCheapestCarTypeInPeriodAndRegion")
+        CarType cheapest = (CarType)em.createNamedQuery("getCheapestCarTypeInPeriodAndRegion")
                 .setParameter("start", start)
                 .setParameter("end", end)
                 .setParameter("region", region)
-                .getFirstResult();
-        if(cheapest == null)
-        {
-            throw new RemoteException();
-        }
-        else
-        {
-            return (String) cheapest;
-        }
+                .getResultList()
+                .get(0);
+        if(cheapest == null) throw new RemoteException("No cheapest car type available");
+        return cheapest.getName();
     }
 }
