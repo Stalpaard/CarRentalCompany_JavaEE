@@ -3,11 +3,9 @@ package client;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import javax.ejb.EJB;
 import javax.naming.InitialContext;
 import rental.CarType;
 import rental.Reservation;
-import rental.ReservationConstraints;
 import session.ManagerSessionRemote;
 import session.ReservationSessionRemote;
 

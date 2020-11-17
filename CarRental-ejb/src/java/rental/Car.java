@@ -10,6 +10,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
@@ -21,6 +23,11 @@ public class Car implements Serializable {
     private int id;
     @OneToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.REFRESH})
     private CarType type;
+    @JoinTable(
+            name="Car_Reservations",
+            joinColumns = @JoinColumn( name="car_fk"),
+            inverseJoinColumns = @JoinColumn( name="reservation_fk")
+        )
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Reservation> reservations;
 

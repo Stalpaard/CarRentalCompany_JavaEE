@@ -10,9 +10,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.Resource;
-import javax.annotation.security.DeclareRoles;
-import javax.annotation.security.RolesAllowed;
 import javax.ejb.EJBContext;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -86,7 +86,7 @@ public class ManagerSession implements ManagerSessionRemote {
         }
         catch(Exception e)
         {
-            //context.setRollbackOnly();
+            context.setRollbackOnly();
             throw new RemoteException("Failed to add company: " + e.getMessage());
         }
     }
@@ -118,21 +118,21 @@ public class ManagerSession implements ManagerSessionRemote {
 
     @Override
     public CarType getMostPopularCarTypeIn(String carRentalCompanyName, int year) throws RemoteException {
-        CarType carType = (CarType) em.createNamedQuery("getMostPopularCarTypeInCompanyInYear")
+        
+        List<CarType> carTypes = (List<CarType>) em.createNamedQuery("getMostPopularCarTypeInCompanyInYear")
                 .setParameter("company", carRentalCompanyName)
                 .setParameter("year", year)
-                .getResultList()
-                .get(0);
-        
-        if(carType == null) throw new RemoteException("No cars were rented that year");
-        return carType;
+                .getResultList();
+
+        if(carTypes == null) throw new RemoteException("No cars were rented that year");
+        return carTypes.get(0);
     }
     
     private void loadRental(String datafile) throws Exception {
         CrcData data = loadData(datafile);
         CarRentalCompany company = new CarRentalCompany(data.name, data.regions, data.cars);
         em.persist(company);
-        //Logger.getLogger(ManagerSession.class.getName()).log(Level.INFO, "Loaded {0} from file {1}", new Object[]{data.name, datafile});
+        Logger.getLogger(ManagerSession.class.getName()).log(Level.INFO, "Loaded {0} from file {1}", new Object[]{data.name, datafile});
     }
     
     private static CrcData loadData(String datafile)

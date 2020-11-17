@@ -12,8 +12,9 @@ import javax.persistence.CascadeType;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -42,8 +43,8 @@ import javax.persistence.OneToMany;
             query = "SELECT c.type FROM Car c WHERE (SELECT COUNT(res) FROM Reservation res WHERE res.carId = c.id AND res.startDate >= :start AND res.endDate <= :end) <= 0"),
     @NamedQuery(
             name = "getCheapestCarTypeInPeriodAndRegion",
-            query = "SELECT c.type FROM CarRentalCompany crc LEFT JOIN crc.regions r LEFT JOIN Car c LEFT JOIN CarType t WHERE "
-                    + "c.type.rentalPricePerDay = (SELECT MIN(c.type.rentalPricePerDay) FROM CarRentalCompany crc LEFT JOIN Car c LEFT JOIN CarType t LEFT JOIN crc.regions r WHERE "
+            query = "SELECT c.type FROM CarRentalCompany crc JOIN crc.regions r JOIN Car c JOIN CarType t WHERE "
+                    + "c.type.rentalPricePerDay = (SELECT MIN(c.type.rentalPricePerDay) FROM CarRentalCompany crc JOIN Car c JOIN CarType t JOIN crc.regions r WHERE "
                     + "r = :region "
                     + "AND (SELECT COUNT(res) FROM Reservation res WHERE res.carId = c.id AND res.startDate >= :start AND res.endDate <= :end) <= 0)"),
     @NamedQuery(
@@ -57,8 +58,8 @@ import javax.persistence.OneToMany;
             query = "SELECT res.carRenter FROM Reservation res GROUP BY res.carRenter HAVING COUNT(res) = :resCount"),
     @NamedQuery(
             name = "getMostPopularCarTypeInCompanyInYear",
-            query = "SELECT c.type FROM CarRentalCompany crc LEFT JOIN Car c LEFT JOIN Reservation res "
-                    + "WHERE res.rentalCompany = :company AND EXTRACT(YEAR FROM res.startDate) = :year GROUP BY c.type "
+            query = "SELECT c.type FROM Car c, Reservation res "
+                    + "WHERE res.rentalCompany = :company AND EXTRACT(YEAR FROM res.startDate) = :year AND c.id = res.carId GROUP BY c.type "
                     + "ORDER BY COUNT(res) DESC")
     })
 
@@ -69,8 +70,18 @@ public class CarRentalCompany implements Serializable {
     @Id
     private String name;
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinTable(
+            name="CRC_Car",
+            joinColumns = @JoinColumn( name="crc_fk"),
+            inverseJoinColumns = @JoinColumn( name="car_fk")
+        )
     private List<Car> cars;
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinTable(
+            name="CRC_CarType",
+            joinColumns = @JoinColumn( name="crc_fk"),
+            inverseJoinColumns = @JoinColumn( name="cartype_fk")
+        )
     private Set<CarType> carTypes = new HashSet<CarType>();
     @ElementCollection
     private List<String> regions;
@@ -81,7 +92,7 @@ public class CarRentalCompany implements Serializable {
      ***************/
 
     public CarRentalCompany(String name, List<String> regions, List<Car> cars) {
-        //logger.log(Level.INFO, "<{0}> Starting up CRC {0} ...", name);
+        logger.log(Level.INFO, "<{0}> Starting up CRC {0} ...", name);
         this.name = name;
         this.cars = cars;
         this.regions = regions;
@@ -144,7 +155,7 @@ public class CarRentalCompany implements Serializable {
     }
 
     public boolean isAvailable(String carTypeName, Date start, Date end) {
-        //logger.log(Level.INFO, "<{0}> Checking availability for car type {1}", new Object[]{name, carTypeName});
+        logger.log(Level.INFO, "<{0}> Checking availability for car type {1}", new Object[]{name, carTypeName});
         return getAvailableCarTypes(start, end).contains(getType(carTypeName));
     }
 
@@ -207,8 +218,8 @@ public class CarRentalCompany implements Serializable {
     
     public Quote createQuote(ReservationConstraints constraints, String guest)
             throws ReservationException {
-        //logger.log(Level.INFO, "<{0}> Creating tentative reservation for {1} with constraints {2}",
-          //      new Object[]{name, guest, constraints.toString()});
+        logger.log(Level.INFO, "<{0}> Creating tentative reservation for {1} with constraints {2}",
+                new Object[]{name, guest, constraints.toString()});
 
 
         if (!this.regions.contains(constraints.getRegion()) || !isAvailable(constraints.getCarType(), constraints.getStartDate(), constraints.getEndDate())) {
@@ -230,7 +241,7 @@ public class CarRentalCompany implements Serializable {
     }
 
     public Reservation confirmQuote(Quote quote) throws ReservationException {
-        //logger.log(Level.INFO, "<{0}> Reservation of {1}", new Object[]{name, quote.toString()});
+        logger.log(Level.INFO, "<{0}> Reservation of {1}", new Object[]{name, quote.toString()});
         List<Car> availableCars = getAvailableCars(quote.getCarType(), quote.getStartDate(), quote.getEndDate());
         if (availableCars.isEmpty()) {
             throw new ReservationException("Reservation failed, all cars of type " + quote.getCarType()
@@ -244,12 +255,12 @@ public class CarRentalCompany implements Serializable {
     }
 
     public void cancelReservation(Reservation res) {
-        //logger.log(Level.INFO, "<{0}> Cancelling reservation {1}", new Object[]{name, res.toString()});
+        logger.log(Level.INFO, "<{0}> Cancelling reservation {1}", new Object[]{name, res.toString()});
         getCar(res.getCarId()).removeReservation(res);
     }
     
     public Set<Reservation> getReservationsBy(String renter) {
-        //logger.log(Level.INFO, "<{0}> Retrieving reservations by {1}", new Object[]{name, renter});
+        logger.log(Level.INFO, "<{0}> Retrieving reservations by {1}", new Object[]{name, renter});
         Set<Reservation> out = new HashSet<Reservation>();
         for(Car c : cars) {
             for(Reservation r : c.getReservations()) {
