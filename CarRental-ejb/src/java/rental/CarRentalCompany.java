@@ -70,18 +70,10 @@ public class CarRentalCompany implements Serializable {
     @Id
     private String name;
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinTable(
-            name="CRC_Car",
-            joinColumns = @JoinColumn( name="crc_fk"),
-            inverseJoinColumns = @JoinColumn( name="car_fk")
-        )
+    @JoinColumn(name = "crc_name")
     private List<Car> cars;
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinTable(
-            name="CRC_CarType",
-            joinColumns = @JoinColumn( name="crc_fk"),
-            inverseJoinColumns = @JoinColumn( name="cartype_fk")
-        )
+    @JoinColumn(name = "crc_name")
     private Set<CarType> carTypes = new HashSet<CarType>();
     @ElementCollection
     private List<String> regions;

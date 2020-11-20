@@ -29,6 +29,7 @@ public class Car implements Serializable {
             inverseJoinColumns = @JoinColumn( name="reservation_fk")
         )
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "car_id")
     private Set<Reservation> reservations;
 
     /***************
