@@ -27,7 +27,6 @@ public class Reservation extends Quote {
     public Reservation()
     {
         super();
-        //kaas
     }
 
     /*************

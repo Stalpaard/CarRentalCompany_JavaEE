@@ -88,10 +88,12 @@ public class ReservationSession implements ReservationSessionRemote {
                 done.add(crc.confirmQuote(quote));
                 em.merge(crc);
             }
-        } catch (Exception e) {
+        } catch (ReservationException e) {
             context.setRollbackOnly();
-            throw new ReservationException(e.getMessage());
+            quotes.clear();
+            throw e;
         }
+        quotes.clear();
         return done;
     }
 

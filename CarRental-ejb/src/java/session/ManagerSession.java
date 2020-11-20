@@ -13,6 +13,8 @@ import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.Resource;
+import javax.annotation.security.DeclareRoles;
+import javax.annotation.security.RolesAllowed;
 import javax.ejb.EJBContext;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -26,8 +28,8 @@ import rental.CarRentalCompany;
 import rental.CarType;
 
 @Stateless
-//@DeclareRoles({"Manager"})
-//@RolesAllowed("Manager")
+@DeclareRoles({"Manager"})
+@RolesAllowed("Manager")
 @TransactionManagement(TransactionManagementType.CONTAINER)
 @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
 public class ManagerSession implements ManagerSessionRemote {
@@ -115,7 +117,7 @@ public class ManagerSession implements ManagerSessionRemote {
                         .setParameter("resCount", best)
                         .getResultList());
     }
-
+    
     @Override
     public CarType getMostPopularCarTypeIn(String carRentalCompanyName, int year) throws RemoteException {
         

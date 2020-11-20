@@ -18,7 +18,6 @@ public class Main extends AbstractTestManagement<ReservationSessionRemote, Manag
     }
 
     public static void main(String[] args) throws Exception {
-        // TODO: use updated manager interface to load cars into companies
         context = new InitialContext();
         ManagerSessionRemote managerSession = (ManagerSessionRemote) context.lookup(ManagerSessionRemote.class.getName());
         managerSession.addCompany("dockx.csv");
