@@ -6,10 +6,12 @@
     <class>rental.Car</class>
     <class>rental.CarType</class>
     <class>rental.Reservation</class>
+    <class>rental.NamedQueryHolder</class>
     <exclude-unlisted-classes>true</exclude-unlisted-classes>
     <properties>
       <property name="javax.persistence.schema-generation.database.action" value="drop-and-create"/>
       <property name="eclipselink.ddl-generation" value="drop-and-create-tables"/>
+      <property name="eclipselink.logging.level" value="FINE"/>
     </properties>
   </persistence-unit>
 </persistence>
